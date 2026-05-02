@@ -1,8 +1,6 @@
-// ui/HomeScreen.java
+// HomeScreen.java
 // The first screen the user sees.
 // Has a welcome message and two buttons: Go to Dashboard, Exit.
-
-package ui;
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,12 +14,12 @@ public class HomeScreen extends JPanel {
         setBackground(new Color(245, 247, 250));
         setLayout(new BorderLayout());
 
-        add(buildTop(),    BorderLayout.NORTH);
+        add(buildTop(), BorderLayout.NORTH);
         add(buildCenter(), BorderLayout.CENTER);
         add(buildBottom(), BorderLayout.SOUTH);
     }
 
-    // ── Top banner ─────────────────────────────────────────────────────────
+    // Top banner
     private JPanel buildTop() {
         JPanel top = new JPanel(new GridBagLayout());
         top.setBackground(new Color(41, 98, 255));
@@ -31,7 +29,7 @@ public class HomeScreen extends JPanel {
         inner.setOpaque(false);
         inner.setLayout(new BoxLayout(inner, BoxLayout.Y_AXIS));
 
-        JLabel icon  = new JLabel("💰", SwingConstants.CENTER);
+        JLabel icon = new JLabel("💰", SwingConstants.CENTER);
         icon.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 50));
         icon.setAlignmentX(CENTER_ALIGNMENT);
 
@@ -54,7 +52,7 @@ public class HomeScreen extends JPanel {
         return top;
     }
 
-    // ── Center card with buttons ───────────────────────────────────────────
+    // Center card with buttons
     private JPanel buildCenter() {
         JPanel outer = new JPanel(new GridBagLayout());
         outer.setBackground(new Color(245, 247, 250));
@@ -87,7 +85,7 @@ public class HomeScreen extends JPanel {
         JButton exitBtn = makeButton("✖  Exit", new Color(220, 60, 60));
         exitBtn.addActionListener(e -> {
             int ok = JOptionPane.showConfirmDialog(frame, "Exit the application?",
-                         "Confirm", JOptionPane.YES_NO_OPTION);
+                    "Confirm", JOptionPane.YES_NO_OPTION);
             if (ok == JOptionPane.YES_OPTION) System.exit(0);
         });
 
@@ -105,7 +103,7 @@ public class HomeScreen extends JPanel {
         return outer;
     }
 
-    // ── Bottom status bar ──────────────────────────────────────────────────
+    // Bottom status bar
     private JPanel buildBottom() {
         JPanel bar = new JPanel(new FlowLayout(FlowLayout.CENTER));
         bar.setBackground(new Color(235, 238, 245));
@@ -117,7 +115,7 @@ public class HomeScreen extends JPanel {
         return bar;
     }
 
-    // ── Helper: create a styled button ────────────────────────────────────
+    // Helper: create a styled button
     static JButton makeButton(String text, Color bg) {
         JButton btn = new JButton(text);
         btn.setFont(new Font("Arial", Font.BOLD, 13));
@@ -127,13 +125,14 @@ public class HomeScreen extends JPanel {
         btn.setBorderPainted(false);
         btn.setOpaque(true);
         btn.setPreferredSize(new Dimension(220, 40));
-        btn.setMaximumSize (new Dimension(220, 40));
+        btn.setMaximumSize(new Dimension(220, 40));
         btn.setAlignmentX(CENTER_ALIGNMENT);
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         return btn;
     }
 
-    // ── Switch content pane ────────────────────────────────────────────────
+   
+    // Switch content pane
     void navigate(JPanel screen) {
         frame.setContentPane(screen);
         frame.revalidate();

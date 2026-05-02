@@ -1,11 +1,6 @@
-// ui/DashboardScreen.java
+// DashboardScreen.java
 // Main screen: shows all expenses in a JTable with totals.
 // Buttons: Add, Edit, Delete, Search, back to Home.
-
-package ui;
-
-import dao.ExpenseDAO;
-import model.Expense;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -16,21 +11,17 @@ import java.util.List;
 
 public class DashboardScreen extends JPanel {
 
-    private final JFrame      frame;
-    private final ExpenseDAO  dao   = new ExpenseDAO();
+    private final JFrame frame;
+    private final ExpenseDAO dao = new ExpenseDAO();
 
-    // Table components
-    private JTable         table;
+    private JTable table;
     private DefaultTableModel tableModel;
 
-    // Summary labels updated after every change
     private JLabel totalLabel;
     private JLabel countLabel;
 
-    // Search field at top
     private JTextField searchField;
 
-    // Column names shown in the JTable header
     private static final String[] COLS = {"ID", "Date", "Category", "Amount (€)", "Description"};
 
     public DashboardScreen(JFrame frame) {
@@ -38,30 +29,29 @@ public class DashboardScreen extends JPanel {
         setLayout(new BorderLayout(0, 0));
         setBackground(new Color(245, 247, 250));
 
-        add(buildTopBar(),     BorderLayout.NORTH);
-        add(buildMain(),       BorderLayout.CENTER);
-        add(buildStatusBar(),  BorderLayout.SOUTH);
+        add(buildTopBar(), BorderLayout.NORTH);
+        add(buildMain(), BorderLayout.CENTER);
+        add(buildStatusBar(), BorderLayout.SOUTH);
 
-        loadTable(); // fetch data from DB when screen opens
+        loadTable();
     }
 
-    // ── Top bar (title + search) ────────────────────────────────────────────
     private JPanel buildTopBar() {
         JPanel bar = new JPanel(new BorderLayout());
         bar.setBackground(new Color(41, 98, 255));
         bar.setBorder(BorderFactory.createEmptyBorder(10, 16, 10, 16));
 
-        // Left: back button + title
         JPanel left = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
         left.setOpaque(false);
 
         JButton homeBtn = HomeScreen.makeButton("← Home", new Color(255, 255, 255, 60));
         homeBtn.setForeground(Color.WHITE);
         homeBtn.setPreferredSize(new Dimension(90, 32));
-        homeBtn.setMaximumSize (new Dimension(90, 32));
+        homeBtn.setMaximumSize(new Dimension(90, 32));
         homeBtn.addActionListener(e -> {
             frame.setContentPane(new HomeScreen(frame));
-            frame.revalidate(); frame.repaint();
+            frame.revalidate();
+            frame.repaint();
         });
 
         JLabel title = new JLabel("📊  Expense Dashboard");
@@ -72,7 +62,6 @@ public class DashboardScreen extends JPanel {
         left.add(Box.createHorizontalStrut(8));
         left.add(title);
 
-        // Right: search bar
         JPanel right = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
         right.setOpaque(false);
 
@@ -82,25 +71,27 @@ public class DashboardScreen extends JPanel {
         JButton searchBtn = HomeScreen.makeButton("🔍 Search", new Color(255, 255, 255, 60));
         searchBtn.setForeground(Color.WHITE);
         searchBtn.setPreferredSize(new Dimension(100, 32));
-        searchBtn.setMaximumSize (new Dimension(100, 32));
+        searchBtn.setMaximumSize(new Dimension(100, 32));
         searchBtn.addActionListener(e -> doSearch());
 
         JButton resetBtn = HomeScreen.makeButton("↺ Reset", new Color(255, 255, 255, 40));
         resetBtn.setForeground(Color.WHITE);
         resetBtn.setPreferredSize(new Dimension(80, 32));
-        resetBtn.setMaximumSize (new Dimension(80, 32));
-        resetBtn.addActionListener(e -> { searchField.setText(""); loadTable(); });
+        resetBtn.setMaximumSize(new Dimension(80, 32));
+        resetBtn.addActionListener(e -> {
+            searchField.setText("");
+            loadTable();
+        });
 
         right.add(searchField);
         right.add(searchBtn);
         right.add(resetBtn);
 
-        bar.add(left,  BorderLayout.WEST);
+        bar.add(left, BorderLayout.WEST);
         bar.add(right, BorderLayout.EAST);
         return bar;
     }
 
-    // ── Main area (summary cards + table + action buttons) ──────────────────
     private JPanel buildMain() {
         JPanel main = new JPanel(new BorderLayout(0, 12));
         main.setBackground(new Color(245, 247, 250));
@@ -108,12 +99,11 @@ public class DashboardScreen extends JPanel {
 
         main.add(buildSummaryRow(), BorderLayout.NORTH);
         main.add(buildTablePanel(), BorderLayout.CENTER);
-        main.add(buildActionRow(),  BorderLayout.SOUTH);
+        main.add(buildActionRow(), BorderLayout.SOUTH);
 
         return main;
     }
 
-    // ── Two summary cards: total amount + record count ──────────────────────
     private JPanel buildSummaryRow() {
         JPanel row = new JPanel(new GridLayout(1, 2, 12, 0));
         row.setOpaque(false);
@@ -127,7 +117,7 @@ public class DashboardScreen extends JPanel {
         countLabel.setFont(new Font("Arial", Font.BOLD, 16));
         countLabel.setForeground(new Color(16, 160, 100));
 
-        row.add(summaryCard("💰  Total Spent",  totalLabel, new Color(235, 242, 255)));
+        row.add(summaryCard("💰  Total Spent", totalLabel, new Color(235, 242, 255)));
         row.add(summaryCard("📋  Total Records", countLabel, new Color(235, 252, 244)));
 
         return row;
@@ -138,8 +128,8 @@ public class DashboardScreen extends JPanel {
         card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
         card.setBackground(bg);
         card.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(210, 220, 240), 1),
-            BorderFactory.createEmptyBorder(12, 16, 12, 16)
+                BorderFactory.createLineBorder(new Color(210, 220, 240), 1),
+                BorderFactory.createEmptyBorder(12, 16, 12, 16)
         ));
 
         JLabel t = new JLabel(title);
@@ -152,9 +142,7 @@ public class DashboardScreen extends JPanel {
         return card;
     }
 
-    // ── JTable with a scroll pane ───────────────────────────────────────────
     private JScrollPane buildTablePanel() {
-        // Non-editable table model
         tableModel = new DefaultTableModel(COLS, 0) {
             @Override public boolean isCellEditable(int r, int c) { return false; }
             @Override public Class<?> getColumnClass(int c) {
@@ -171,23 +159,24 @@ public class DashboardScreen extends JPanel {
         table.setSelectionForeground(Color.BLACK);
         table.setFillsViewportHeight(true);
 
-        // Header style
         table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 13));
         table.getTableHeader().setBackground(new Color(41, 98, 255));
         table.getTableHeader().setForeground(Color.WHITE);
         table.getTableHeader().setPreferredSize(new Dimension(0, 34));
 
-        // Column widths
         table.getColumnModel().getColumn(0).setPreferredWidth(40);
         table.getColumnModel().getColumn(1).setPreferredWidth(90);
         table.getColumnModel().getColumn(2).setPreferredWidth(100);
         table.getColumnModel().getColumn(3).setPreferredWidth(100);
         table.getColumnModel().getColumn(4).setPreferredWidth(280);
 
-        // Right-align the Amount column and format as €
         table.getColumnModel().getColumn(3).setCellRenderer(new DefaultTableCellRenderer() {
-            { setHorizontalAlignment(SwingConstants.RIGHT); }
-            @Override public Component getTableCellRendererComponent(
+            {
+                setHorizontalAlignment(SwingConstants.RIGHT);
+            }
+
+            @Override
+            public Component getTableCellRendererComponent(
                     JTable t, Object v, boolean sel, boolean foc, int r, int c) {
                 super.getTableCellRendererComponent(t, v, sel, foc, r, c);
                 if (v instanceof Double d) setText(String.format("€ %.2f", d));
@@ -195,9 +184,9 @@ public class DashboardScreen extends JPanel {
             }
         });
 
-        // Alternating row colours
         table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
-            @Override public Component getTableCellRendererComponent(
+            @Override
+            public Component getTableCellRendererComponent(
                     JTable t, Object v, boolean sel, boolean foc, int r, int c) {
                 super.getTableCellRendererComponent(t, v, sel, foc, r, c);
                 if (!sel) {
@@ -214,22 +203,21 @@ public class DashboardScreen extends JPanel {
         return scroll;
     }
 
-    // ── Action buttons below the table ─────────────────────────────────────
     private JPanel buildActionRow() {
         JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         row.setOpaque(false);
 
-        JButton addBtn  = HomeScreen.makeButton("➕  Add Expense",    new Color(16, 160, 100));
-        JButton editBtn = HomeScreen.makeButton("✏️  Edit Expense",   new Color(41,  98, 255));
-        JButton delBtn  = HomeScreen.makeButton("🗑  Delete Expense", new Color(220,  60,  60));
+        JButton addBtn = HomeScreen.makeButton("➕  Add Expense", new Color(16, 160, 100));
+        JButton editBtn = HomeScreen.makeButton("✏️  Edit Expense", new Color(41, 98, 255));
+        JButton delBtn = HomeScreen.makeButton("🗑  Delete Expense", new Color(220, 60, 60));
 
-        addBtn.setPreferredSize (new Dimension(160, 36));
+        addBtn.setPreferredSize(new Dimension(160, 36));
         editBtn.setPreferredSize(new Dimension(160, 36));
-        delBtn.setPreferredSize (new Dimension(160, 36));
+        delBtn.setPreferredSize(new Dimension(160, 36));
 
-        addBtn.addActionListener (e -> openAddForm());
+        addBtn.addActionListener(e -> openAddForm());
         editBtn.addActionListener(e -> openEditForm());
-        delBtn.addActionListener (e -> deleteSelected());
+        delBtn.addActionListener(e -> deleteSelected());
 
         row.add(addBtn);
         row.add(editBtn);
@@ -237,7 +225,6 @@ public class DashboardScreen extends JPanel {
         return row;
     }
 
-    // ── Status bar ──────────────────────────────────────────────────────────
     private JPanel buildStatusBar() {
         JPanel bar = new JPanel(new FlowLayout(FlowLayout.LEFT));
         bar.setBackground(new Color(235, 238, 245));
@@ -249,11 +236,10 @@ public class DashboardScreen extends JPanel {
         return bar;
     }
 
-    // ── Load / refresh table from DB ────────────────────────────────────────
     public void loadTable() {
         try {
-            List<Expense> list  = dao.getAll();
-            double        total = dao.getTotal();
+            List<Expense> list = dao.getAll();
+            double total = dao.getTotal();
             fillTable(list, total);
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(this, "DB Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -261,23 +247,24 @@ public class DashboardScreen extends JPanel {
     }
 
     private void fillTable(List<Expense> list, double total) {
-        tableModel.setRowCount(0); // clear existing rows
+        tableModel.setRowCount(0);
         for (Expense e : list) {
             tableModel.addRow(new Object[]{
-                e.getId(), e.getDate(), e.getCategory(), e.getAmount(), e.getDescription()
+                    e.getId(), e.getDate(), e.getCategory(), e.getAmount(), e.getDescription()
             });
         }
         totalLabel.setText(String.format("€ %.2f", total));
         countLabel.setText(list.size() + " record" + (list.size() == 1 ? "" : "s"));
     }
 
-    // ── Search ──────────────────────────────────────────────────────────────
     private void doSearch() {
         String kw = searchField.getText().trim();
-        if (kw.isEmpty()) { loadTable(); return; }
+        if (kw.isEmpty()) {
+            loadTable();
+            return;
+        }
         try {
             List<Expense> results = dao.search(kw);
-            // compute total of search results only
             double total = results.stream().mapToDouble(Expense::getAmount).sum();
             fillTable(results, total);
         } catch (SQLException ex) {
@@ -285,30 +272,33 @@ public class DashboardScreen extends JPanel {
         }
     }
 
-    // ── Add ─────────────────────────────────────────────────────────────────
     private void openAddForm() {
         ExpenseFormDialog dlg = new ExpenseFormDialog(frame, null, dao);
         dlg.setVisible(true);
         if (dlg.wasSaved()) loadTable();
     }
 
-    // ── Edit ─────────────────────────────────────────────────────────────────
     private void openEditForm() {
         Expense sel = getSelectedExpense();
-        if (sel == null) { showInfo("Please select a row to edit."); return; }
+        if (sel == null) {
+            showInfo("Please select a row to edit.");
+            return;
+        }
         ExpenseFormDialog dlg = new ExpenseFormDialog(frame, sel, dao);
         dlg.setVisible(true);
         if (dlg.wasSaved()) loadTable();
     }
 
-    // ── Delete ───────────────────────────────────────────────────────────────
     private void deleteSelected() {
         Expense sel = getSelectedExpense();
-        if (sel == null) { showInfo("Please select a row to delete."); return; }
+        if (sel == null) {
+            showInfo("Please select a row to delete.");
+            return;
+        }
 
         int ok = JOptionPane.showConfirmDialog(this,
-            "Delete the " + sel.getCategory() + " expense of € " + sel.getAmount() + "?",
-            "Confirm Delete", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                "Delete the " + sel.getCategory() + " expense of € " + sel.getAmount() + "?",
+                "Confirm Delete", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 
         if (ok == JOptionPane.YES_OPTION) {
             try {
@@ -316,19 +306,18 @@ public class DashboardScreen extends JPanel {
                 loadTable();
             } catch (SQLException ex) {
                 JOptionPane.showMessageDialog(this, "Delete failed: " + ex.getMessage(),
-                    "Error", JOptionPane.ERROR_MESSAGE);
+                        "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
 
-    // Returns the Expense for the currently selected table row, or null
     private Expense getSelectedExpense() {
         int row = table.getSelectedRow();
         if (row < 0) return null;
-        int    id   = (int)    tableModel.getValueAt(row, 0);
+        int id = (int) tableModel.getValueAt(row, 0);
         String date = (String) tableModel.getValueAt(row, 1);
-        String cat  = (String) tableModel.getValueAt(row, 2);
-        double amt  = (double) tableModel.getValueAt(row, 3);
+        String cat = (String) tableModel.getValueAt(row, 2);
+        double amt = (double) tableModel.getValueAt(row, 3);
         String desc = (String) tableModel.getValueAt(row, 4);
         return new Expense(id, amt, cat, date, desc);
     }
